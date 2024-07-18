@@ -1,7 +1,18 @@
+using ClipShare.DataAccess.Data;
+using ClipShare.Extensions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.AddApplicationServices();
 
 var app = builder.Build();
 
@@ -24,4 +35,24 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+InitializeContext();
 app.Run();
+
+
+
+void InitializeContext()
+{
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var context = scope.ServiceProvider.GetService<Context>();
+        ContextInitializer.Initialize(context);
+    }
+    catch(Exception ex)
+    {
+        var logger = services.GetService<ILogger<Program>>();
+        logger.LogError(ex, "An error occured while migrating the databse");
+    }
+}
