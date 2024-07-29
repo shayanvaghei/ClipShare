@@ -1,18 +1,22 @@
+using ClipShare.Core.Entities;
 using ClipShare.DataAccess.Data;
 using ClipShare.Extensions;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.AddApplicationServices();
+builder.AddAuthenticationServices();
 
 var app = builder.Build();
 
@@ -29,18 +33,19 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-InitializeContext();
+await InitializeContextAsync();
 app.Run();
 
 
 
-void InitializeContext()
+async Task InitializeContextAsync()
 {
     using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
@@ -48,7 +53,9 @@ void InitializeContext()
     try
     {
         var context = scope.ServiceProvider.GetService<Context>();
-        ContextInitializer.Initialize(context);
+        var userManager = scope.ServiceProvider.GetService<UserManager<AppUser>>();
+        var roleManager = scope.ServiceProvider.GetService<RoleManager<AppRole>>();
+        await ContextInitializer.InitializeAsync(context, userManager, roleManager);
     }
     catch(Exception ex)
     {

@@ -4,6 +4,10 @@ namespace ClipShare.Utility
 {
     public static class SD
     {
+        public const string AdminRole = "admin";
+        public const string ModeratorRole = "moderator";
+        public const string UserRole = "user";
+        public static readonly List<string> Roles = new List<string> { AdminRole, UserRole, ModeratorRole};
 
         public static string IsActive(this IHtmlHelper html, string controller, string action, string cssClass = "active")
         {

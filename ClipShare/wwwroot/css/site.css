@@ -34,3 +34,8 @@ body {
 .active {
     color: darkorange !important;
 }
+
+
+.main {
+    min-height: 550px;
+}

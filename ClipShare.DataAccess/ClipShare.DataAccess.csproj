@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClipShare.Core\ClipShare.Core.csproj" />
+    <ProjectReference Include="..\ClipShare.Utility\ClipShare.Utility.csproj" />
   </ItemGroup>
 
 </Project>
