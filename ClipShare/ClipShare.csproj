@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Content Remove="Views\Shared\_LoginPartial.cshtml" />
+    <Content Remove="Views\Shared\_Notification.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,10 +29,16 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Views\Shared\_LoginPartial.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Shared\_Notification.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Views\Shared\_LoginPartial.cshtml" />
+    <None Include="Views\Shared\_Notification.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Shared\_Notification.cshtml" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,40 @@
+﻿@if (TempData["notification"] != null)
+{
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(function () {
+            const notificationModel = '@TempData["notification"]'.split(";");
+            let isSuccess = (notificationModel[0] === 'true');
+            let title = notificationModel[1];
+            let message = notificationModel[2];
+
+            var modalContentInnerHtml =
+                `
+                    <div class="modal-header ${isSuccess === true ? 'bg-success' : 'bg-danger'}">
+                        <h5 class="modal-title" id="modalLabel">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-bs-dismiss="modal">OK</button>
+                    </div>
+                 `;
+            $("#notificationModalContent").append(modalContentInnerHtml);
+            $("#triggerModalButton").trigger('click');
+        });
+    </script>
+}
+
+<button type="button" id="triggerModalButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#notificationModal" style="display:none;">
+    Launch demo modal
+</button>
+
+
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div id="notificationModalContent" class="modal-content">
+        </div>
+    </div>
+</div>
