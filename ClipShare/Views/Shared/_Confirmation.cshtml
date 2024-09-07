@@ -1,0 +1,45 @@
+﻿
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div id="confirmationModalContent" class="modal-content">
+        </div>
+    </div>
+</div>
+
+<button type="button" id="confirmModalButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmationModal" style="display:none">
+    Launch demo modal
+</button>
+
+
+<script>
+    function confirmation(message) {
+        return new Promise((resolve) => {
+            $('#confirmationModalContent').empty();
+
+            var modalContentInnerHtml =
+                `
+                    <div class="modal-header bg-info">
+                        <h5 class="modal-title text-white" id="modalLabel">Confirmation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message}
+                    </div>
+                    <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-bs-dismiss="modal" id="confirmOk">OK</button>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="confirmCancel">Cancel</button>
+                    </div>`;
+
+            $("#confirmationModalContent").append(modalContentInnerHtml);
+            $("#confirmModalButton").trigger('click');
+
+            $('#confirmOk').on('click', function () {
+                resolve(true);
+            });
+
+            $('#confirmCancel').on('click', function () {
+                resolve(false);
+            });
+        });
+    }
+</script>
