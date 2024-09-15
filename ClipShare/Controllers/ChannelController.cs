@@ -98,5 +98,26 @@ namespace ClipShare.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> EditChannel(ChannelAddEdit_vm model)
+        {
+            if (ModelState.IsValid)
+            {
+                var channel = await UnitOfWork.ChannelRepo.GetFirstOrDefaultAsync(x => x.AppUserId == User.GetUserId());
+                if (channel != null)
+                {
+                    channel.Name = model.Name;
+                    channel.About = model.About;
+                    await UnitOfWork.CompleteAsync();
+
+                    TempData["notification"] = "true;Channel updated;Your channel is updated";
+                    return RedirectToAction("Index");
+                }
+            }
+
+            TempData["notification"] = "false;Not Found;Your channel was not found";
+            return RedirectToAction("Index");
+        }
     }
 }

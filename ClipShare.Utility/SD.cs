@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Cryptography;
 
 namespace ClipShare.Utility
 {
@@ -8,6 +9,7 @@ namespace ClipShare.Utility
         public const string ModeratorRole = "moderator";
         public const string UserRole = "user";
         public static readonly List<string> Roles = new List<string> { AdminRole, UserRole, ModeratorRole};
+        public const int MB = 1000000;
 
         public static string IsActive(this IHtmlHelper html, string controller, string action, string cssClass = "active")
         {
@@ -18,6 +20,15 @@ namespace ClipShare.Utility
             var retrunActive = controller == routeController && action == routeAction;
 
             return retrunActive ? cssClass : string.Empty;
+        }
+
+        public static string GetRandomeName()
+        {
+            var randomNumber = new byte[10];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+
+            return Convert.ToBase64String(randomNumber);
         }
     }
 }

@@ -2,6 +2,8 @@
 using ClipShare.Core.IRepo;
 using ClipShare.DataAccess.Data;
 using ClipShare.DataAccess.Repo;
+using ClipShare.Services;
+using ClipShare.Services.IServices;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +24,7 @@ namespace ClipShare.Extensions
             });
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IPhotoService, PhotoService>();
             builder.Services.AddSession();
 
             return builder;

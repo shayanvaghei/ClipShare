@@ -1,0 +1,82 @@
+﻿@model ClipShare.ViewModels.Video.VideoAddEdit_vm
+
+<div class="card border-secondary mb-3">
+    <div class="card-header bg-black-info">
+        <span class="text-dark h4">
+            @(Model.Id > 0 ? "Edit" : "Create") Video
+        </span>
+    </div>
+    <div class="card-body">
+        <form id="videoAddEditForm" asp-action="CreateEditVideo" enctype="multipart/form-data">
+            <input id="videoId" hidden asp-for="Id" />
+            <input id="imageUrl" asp-for="ImageUrl" hidden />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="CategoryId" class="form-label"></label>
+                        <select asp-for="CategoryId" asp-items="Model.CategoryDropdown" class="form-select">
+                            <option disabled selected>Select here</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <div class="card mb-2 preview-image rounded bg-secondary" id="previewImage"></div>
+                        <label asp-for="ImageUpload" class="form-label"></label>
+                        <input id="imageUpload" asp-for="ImageUpload" type="file" class="form-control" accept="@Model.ImageContentTypes" />
+                        <span asp-validation-for="ImageUpload" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="VideoUpload" class="form-label"></label>
+                        <input id="videoUpload" asp-for="VideoUpload" type="file" class="form-control" accept="@Model.VideoContentTypes" />
+                        <span asp-validation-for="VideoUpload" class="text-danger"></span>
+                    </div>
+                </div>
+                
+            </div>
+        </form>
+    </div>
+    <div class="card-footer text-muted text-center">
+        <button class="btn btn-success" type="submit" form="videoAddEditForm">Save</button>
+        <a class="btn btn-warning" asp-controller="Channel" asp-action="Index">Back</a>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+
+        $(function () {
+            if ($('#videoId').val() > 0) {
+                // diplay preview image
+                $('#videoUpload').prop("disabled", true);
+                const url = $('#imageUrl').val();
+                $('#previewImage').append(`<img src="${url}" class="card-img-top rounded preview-image" />`)
+            }
+        })
+
+        $('#imageUpload').on('change', function () {
+            if (this.files) {
+                $('#previewImage').empty();
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    $('#previewImage').append(`<img src="${event.target.result}" class="card-img-top rounded preview-image" />`);
+                }
+
+                reader.readAsDataURL(this.files[0]);
+            }
+        })
+    </script>
+}

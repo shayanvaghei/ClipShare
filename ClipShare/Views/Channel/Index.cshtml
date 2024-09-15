@@ -23,6 +23,107 @@
 }
 else
 {
-    <p>Name: @Model.Name</p>
-    <p>About: @Model.About</p>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class=" nav-link" data-bs-toggle="tab" href="#myvideos">My Videos</a>
+        </li>
+        <li class="nav-item">
+            <a class=" nav-link" data-bs-toggle="tab" href="#analytics">Analytics</a>
+        </li>
+        <li class="nav-item">
+            <a class=" nav-link" data-bs-toggle="tab" href="#profile">Profile</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane fade" id="myvideos">
+            <div class="mt-3">
+                <a class="btn btn-primary" asp-controller="Video" asp-action="CreateEditVideo">Create Video</a>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="analytics">
+            <div class="mt-3">
+                Analytics
+            </div>
+        </div>
+        <div class="tab-pane fade" id="profile">
+            <div class="mt-3">
+                <form asp-action="EditChannel" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Name" class="form-label"></label>
+                                <input id="profile_name" asp-for="Name" type="text" class="form-control" disabled />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="About" class="form-label"></label>
+                                <textarea id="profile_about" asp-for="About" type="text" class="form-control" rows="6" disabled></textarea>
+                                <span asp-validation-for="About" class="text-danger"></span>
+                            </div>
+                            <div class="row" id="divEditButton">
+                                <div class="col">
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="editProfile()">Edit</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="updateProfileButtons" style="display: none;">
+                                <div class="offset-3 col-6">
+                                    <div class="row">
+                                        <div class="col d-grid">
+                                            <button class="btn btn-success" type="submit">Update</button>
+                                        </div>
+                                        <div class="col d-grid">
+                                            <button class="btn btn-danger" type="button" onclick="cancelEdit()">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(function () {
+            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var currentTabId = $(e.target).attr('href');
+                localStorage.setItem('activeTab', currentTabId);
+            });
+
+            var activeTab = localStorage.getItem('activeTab');
+            if (activeTab) {
+                $('a[href="' + activeTab + '"]').tab('show');
+            } else {
+                $('a[href="#myvideos"]').tab('show');
+            }
+        });
+
+        function editProfile() {
+            $('#updateProfileButtons').show();
+            $('#profile_name').prop("disabled", false);
+            $('#profile_about').prop("disabled", false);
+            $('#divEditButton').hide();
+        }
+
+        function cancelEdit() {
+            $('#divEditButton').show();
+            $('#updateProfileButtons').hide();
+            $('#profile_name').val('@Model.Name');
+            $('#profile_about').val('@Model.About');
+
+            $('#profile_name').prop("disabled", true);
+            $('#profile_about').prop("disabled", true);
+
+            $('#profile_name-error').empty();
+            $('#profile_about-error').empty();
+            $('#profile_name').removeClass('input-validation-error');
+            $('#profile_about').removeClass('input-validation-error');
+        }
+    </script>
 }
