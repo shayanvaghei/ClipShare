@@ -1,5 +1,11 @@
 ﻿@model ClipShare.ViewModels.Channel.ChannelAddEdit_vm
 
+<style>
+    .sortBy {
+        cursor: pointer;
+    }
+</style>
+
 @if (string.IsNullOrEmpty(Model.Name) || Model.Errors.Count > 0)
 {
     <p>You don't have any channels yet. Use the form bellow to create your channel.</p>
@@ -36,8 +42,78 @@ else
     </ul>
     <div class="tab-content">
         <div class="tab-pane fade" id="myvideos">
-            <div class="mt-3">
+            <div class="mt-3 d-flex justify-content-between">
                 <a class="btn btn-primary" asp-controller="Video" asp-action="CreateEditVideo">Create Video</a>
+                <h4 class="text-danger-emphasis">Subscribers: 2,343</h4>
+            </div>
+            <div class=" card border-primary mt-3 table-responsive-md">
+                <table class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Video</th>
+                            <th class="sortBy" data-value="title">
+                                <span>Title</span>
+                                <span id="titleSortBy"></span>
+                            </th>
+                            <th class="sortBy" data-value="date">
+                                <span>Date</span>
+                                <span id="dateSortBy"></span>
+                            </th>
+                            <th class="sortBy" data-value="views">
+                                <span>Views</span>
+                                <span id="viewsSortBy"></span>
+                            </th>
+                            <th class="sortBy" data-value="comments">
+                                <span>Comments</span>
+                                <span id="commentsSortBy"></span>
+                            </th>
+                            <th class="sortBy" data-value="likes">
+                                <span>Likes</span>
+                                <span id="likesSortBy"></span>
+                            </th>
+                            <th class="sortBy" data-value="dislikes">
+                                <span>Dislikes</span>
+                                <span id="dislikesSortBy"></span>
+                            </th>
+                            <th class="sortBy" data-value="category">
+                                <span>Category</span>
+                                <span id="categorySortBy"></span>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="videosTableBody">
+
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-end me-3 mb-2">
+                    <ul class="navbar-nav me-3">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="itemsPerPageDropdown" role="button" aria-expanded="false">Rows per page:</a>
+                            <div class="dropdown-menu">
+                                <button type="button" class="dropdown-item pageSizeBtn" data-value="5">5</button>
+                                <button type="button" class="dropdown-item pageSizeBtn" data-value="10">10</button>
+                                <button type="button" class="dropdown-item pageSizeBtn" data-value="20">20</button>
+                                <button type="button" class="dropdown-item pageSizeBtn" data-value="50">50</button>
+                                <button type="button" class="dropdown-item pageSizeBtn" data-value="100">100</button>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav me-3">
+                        <li class="nav-item">
+                            <span class="nav-link" id="itemsPerPageDisplay"></span>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav me-3">
+                        <li class="nav-item">
+                            <span class="nav-link" id="paginationSummery"></span>
+                        </li>
+                    </ul>
+
+                    <div id="paginationBtnGroup" class="btn-group">
+                    </div>
+                </div>
             </div>
         </div>
         <div class="tab-pane fade" id="analytics">
@@ -90,6 +166,10 @@ else
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
+        let pageNumber = 1;
+        let pageSize = 5;
+        let sortBy = '';
+
         $(function () {
             $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var currentTabId = $(e.target).attr('href');
@@ -102,7 +182,187 @@ else
             } else {
                 $('a[href="#myvideos"]').tab('show');
             }
+
+            getMyVideos();
         });
+
+        function getMyVideos() {
+            const parameters = {
+                pageNumber,
+                pageSize,
+                sortBy
+            }
+
+            $.ajax({
+                url: "/Video/GetVideosForChannelGrid",
+                type: "GET",
+                data: parameters,
+                success: function (data) {
+                    const result = data.result;
+
+                    $('#videosTableBody').empty();
+                    $('#paginationSummery').empty();
+                    $('#paginationBtnGroup').empty();
+                    $('#itemsPerPageDisplay').empty();
+
+                    populateVideoTableBody(result.items);
+
+                    if (result.totalItemsCount > 0) {
+                        $('#itemsPerPageDisplay').text(pageSize);
+
+                        const from = (result.pageNumber - 1) * result.pageSize + 1;
+                        const to = result.pageNumber * result.pageSize > result.totalItemsCount ? result.totalItemsCount : result.pageNumber * result.pageSize;
+                        $('#paginationSummery').text(`${from}-${to} of ${result.totalItemsCount}`);
+
+
+                        // Next Page, Last Page, Previous Page, First Page buttons and functionalities
+                        let firstPageBtn = '';
+                        firstPageBtn += `<button type="button" class="btn btn-secondary btn-sm paginationBtn" ${result.pageNumber == 1 ? 'disabled' : ''} data-value="1" data-bs-toggle="tooltip" data-bs-placement="bottom" title="First Page">`;
+                        firstPageBtn += '<i class="bi bi-chevron-bar-left"></i>';
+                        firstPageBtn += '</button>';
+                        $('#paginationBtnGroup').append(firstPageBtn);
+
+                        let previousePageBtn = '';
+                        previousePageBtn += `<button type="button" class="btn btn-secondary btn-sm paginationBtn" ${result.pageNumber == 1 ? 'disabled' : ''} data-value="${result.pageNumber - 1}" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Previous Page">`;
+                        previousePageBtn += '<i class="bi bi-chevron-left"></i>';
+                        previousePageBtn += '</button>';
+                        $('#paginationBtnGroup').append(previousePageBtn);
+
+                        let nextPageBtn = '';
+                        nextPageBtn += `<button type="button" class="btn btn-secondary btn-sm paginationBtn" ${result.pageNumber == result.totalPages ? 'disabled' : ''} data-value="${result.pageNumber + 1}" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Next Page">`;
+                        nextPageBtn += '<i class="bi bi-chevron-right"></i>';
+                        nextPageBtn += '</button>';
+                        $('#paginationBtnGroup').append(nextPageBtn);
+
+                        let lastPageBtn = '';
+                        lastPageBtn += `<button type="button" class="btn btn-secondary btn-sm paginationBtn" ${result.pageNumber == result.totalPages ? 'disabled' : ''}  data-value="${result.totalPages}" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Last Page">`;
+                        lastPageBtn += '<i class="bi bi-chevron-bar-right"></i>';
+                        lastPageBtn += '</button>';
+                        $('#paginationBtnGroup').append(lastPageBtn);
+
+                        // On paginationBtn click event
+                        $('.paginationBtn').click(function () {
+                            pageNumber = $(this).data('value');
+                            getMyVideos();
+                        });
+                    } else {
+                        $('#itemsPerPageDropdown').hide();
+                    }
+                }
+            });
+        }
+
+        // On dropdown "Rows per page" selection event
+        $('.pageSizeBtn').click(function () {
+            pageSize = $(this).data('value');
+            getMyVideos();
+        });
+
+        // On each table header click event
+        $('.sortBy').click(function () {
+            const sortByValue = $(this).data('value');
+            $sortBySpan = $('#' + sortByValue + 'SortBy');
+            const $i = $sortBySpan.find('i');
+
+            if ($i.hasClass('bi-arrow-up-short')) {
+                $sortBySpan.empty();
+                $sortBySpan.append('<i class="bi bi-arrow-down-short"></i>');
+                sortBy = sortByValue + '-d';
+            } else if ($i.hasClass('bi-arrow-down-short')) {
+                $sortBySpan.empty();
+                sortBy = '';
+            } else {
+                $sortBySpan.empty();
+                $sortBySpan.append('<i class="bi bi-arrow-up-short"></i>');
+                sortBy = sortByValue + '-a';
+            }
+
+            // remove all other arrows
+            removeAllOtherArrows(sortByValue);
+            getMyVideos();
+        });
+
+        function removeAllOtherArrows(exception) {
+            if (exception == 'title') {
+                $('#dateSortBy').empty();
+                $('#viewsSortBy').empty();
+                $('#commentsSortBy').empty();
+                $('#likesSortBy').empty();
+                $('#dislikesSortBy').empty();
+                $('#categorySortBy').empty();
+            } else if (exception == 'date') {
+                $('#titleSortBy').empty();
+                $('#viewsSortBy').empty();
+                $('#commentsSortBy').empty();
+                $('#likesSortBy').empty();
+                $('#dislikesSortBy').empty();
+                $('#categorySortBy').empty();
+            } else if (exception == 'views') {
+                $('#titleSortBy').empty();
+                $('#dateSortBy').empty();
+                $('#commentsSortBy').empty();
+                $('#likesSortBy').empty();
+                $('#dislikesSortBy').empty();
+                $('#categorySortBy').empty();
+            } else if (exception == 'comments') {
+                $('#titleSortBy').empty();
+                $('#dateSortBy').empty();
+                $('#viewsSortBy').empty();
+                $('#likesSortBy').empty();
+                $('#dislikesSortBy').empty();
+                $('#categorySortBy').empty();
+            } else if (exception == 'likes') {
+                $('#titleSortBy').empty();
+                $('#dateSortBy').empty();
+                $('#viewsSortBy').empty();
+                $('#commentsSortBy').empty();
+                $('#dislikesSortBy').empty();
+                $('#categorySortBy').empty();
+            } else if (exception == 'dislikes') {
+                $('#titleSortBy').empty();
+                $('#dateSortBy').empty();
+                $('#viewsSortBy').empty();
+                $('#commentsSortBy').empty();
+                $('#likesSortBy').empty();
+                $('#categorySortBy').empty();
+            } else if (exception == 'category') {
+                $('#titleSortBy').empty();
+                $('#dateSortBy').empty();
+                $('#viewsSortBy').empty();
+                $('#commentsSortBy').empty();
+                $('#likesSortBy').empty();
+                $('#dislikesSortBy').empty();
+            }
+        }
+
+        function populateVideoTableBody(videos) {
+            let trTag = '';
+
+            if (videos.length > 0) {
+
+                videos.map((v, index) => {
+                    trTag += '<tr>';
+                    trTag += `<td>${index + 1}</td>`;
+                    trTag += `<td><img src="${v.thumbnailUrl}" class="card-img-top rounded preview-image" /></td>`;
+                    trTag += `<td><p>${v.title}</p></td>`;
+                    trTag += `<td>${new Date(v.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>`;
+                    trTag += `<td>${v.views.toLocaleString()}</td>`;
+                    trTag += `<td>${v.comments.toLocaleString()}</td>`;
+                    trTag += `<td>${v.likes.toLocaleString()}</td>`;
+                    trTag += `<td>${v.dislikes.toLocaleString()}</td>`;
+                    trTag += `<td>${v.categoryName}</td>`;
+                    trTag += '<td>';
+                    trTag += `<a href="/Video/CreateEditVideo/${v.id}" class="btn btn-warning text-white me-2"><i class="bi bi-pencil"></i></a>`;
+                    trTag += `<button class="btn btn-danger text-white me-2" onclick="deleteVideo(${v.id}, '${v.title}')"><i class="bi bi-trash3"></i></button>`;
+                    trTag += '</td>';
+                    trTag += '</tr>';
+                });
+            } else {
+                trTag = '<tr><td colspan="10" class="text-center">You don\'t have any videos</td></tr>';
+            }
+
+            $('#videosTableBody').append(trTag);
+        }
 
         function editProfile() {
             $('#updateProfileButtons').show();
@@ -124,6 +384,20 @@ else
             $('#profile_about-error').empty();
             $('#profile_name').removeClass('input-validation-error');
             $('#profile_about').removeClass('input-validation-error');
+        }
+
+        async function deleteVideo(id, name) {
+            const result = await confirmation('Are you sure you want to remove ' + name + '?');
+            if (result) {
+                $.ajax({
+                    url: "/Video/DeleteVideo/" + id,
+                    type: "DELETE",
+                    success: function (data) {
+                        displayNotification(data.isSuccess, data.title, data.message, 'modal');
+                        getMyVideos();
+                    }
+                });
+            }
         }
     </script>
 }

@@ -48,4 +48,8 @@
     <UpToDateCheckInput Remove="Views\Shared\_Confirmation.cshtml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Seed\Files\" />
+  </ItemGroup>
+
 </Project>

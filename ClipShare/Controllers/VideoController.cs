@@ -1,7 +1,10 @@
-﻿using ClipShare.Core.Entities;
+﻿using ClipShare.Core.DTOs;
+using ClipShare.Core.Entities;
+using ClipShare.Core.Pagination;
 using ClipShare.Extensions;
 using ClipShare.Services.IServices;
 using ClipShare.Utility;
+using ClipShare.ViewModels;
 using ClipShare.ViewModels.Video;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -180,6 +183,34 @@ namespace ClipShare.Controllers
             model.CategoryDropdown = await GetCategoryDropdownAsync();
             return View(model);
         }
+
+        #region API Endpoints
+        [HttpGet]
+        public async Task<IActionResult> GetVideosForChannelGrid(BaseParameters parameters)
+        {
+            var userChannelId = await UnitOfWork.ChannelRepo.GetChannelIdByUserId(User.GetUserId());
+            var videosForGrid = await UnitOfWork.VideoRepo.GetVideosForChannelGrid(userChannelId, parameters);
+            var paginatedResults = new PaginatedResult<VideoGridChannelDto>(videosForGrid, videosForGrid.TotalItemsCount,
+                videosForGrid.PageNumber, videosForGrid.PageSize, videosForGrid.TotalPages);
+
+            return Json(new ApiResponse(200, result: paginatedResults));
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteVideo(int id)
+        {
+            var video = await UnitOfWork.VideoRepo.GetFirstOrDefaultAsync(x => x.Id == id && x.Channel.AppUserId == User.GetUserId());
+            if (video != null)
+            {
+                UnitOfWork.VideoRepo.Remove(video);
+                await UnitOfWork.CompleteAsync();
+
+                return Json(new ApiResponse(200, "Deleted", "Your video of " + video.Title + " has been deleted"));
+            }
+            return Json(new ApiResponse(404, message: "The requested video was not found"));
+        }
+
+        #endregion
 
         #region Private Methods
         public async Task<IEnumerable<SelectListItem>> GetCategoryDropdownAsync()

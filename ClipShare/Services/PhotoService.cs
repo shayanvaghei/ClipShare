@@ -2,6 +2,7 @@
 using ClipShare.Utility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.IO;
 
 namespace ClipShare.Services
@@ -26,7 +27,7 @@ namespace ClipShare.Services
                 Directory.CreateDirectory(uploadsDriectory);
             }
 
-            string fileName = SD.GetRandomeName();
+            string fileName = Guid.NewGuid().ToString();
             var extension = Path.GetExtension(photo.FileName);
 
             if (!string.IsNullOrEmpty(oldPhotoUrl))

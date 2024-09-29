@@ -1,6 +1,8 @@
 using ClipShare.Core.Entities;
 using ClipShare.DataAccess.Data;
 using ClipShare.Extensions;
+using ClipShare.Seed;
+using ClipShare.Services.IServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -56,7 +58,8 @@ async Task InitializeContextAsync()
         var context = scope.ServiceProvider.GetService<Context>();
         var userManager = scope.ServiceProvider.GetService<UserManager<AppUser>>();
         var roleManager = scope.ServiceProvider.GetService<RoleManager<AppRole>>();
-        await ContextInitializer.InitializeAsync(context, userManager, roleManager);
+        var photoService = scope.ServiceProvider.GetService<IPhotoService>();
+        await ContextInitializer.InitializeAsync(context, userManager, roleManager, photoService);
     }
     catch(Exception ex)
     {
