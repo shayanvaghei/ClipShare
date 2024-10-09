@@ -1,0 +1,42 @@
+﻿@model ClipShare.ViewModels.Home.Home_vm
+
+<div class="bg-dark rounded">
+    <div class="row p-2">
+        <div class="col-4">
+            <select id="categoryDropdown" asp-items="Model.CategoryDropdown" class="form-select"></select>
+        </div>
+        <div class="col-8 text-end d-flex">
+            <input id="searchInput" placeholder="Search" class="form-control" />
+            <button class="btn btn-secondary ms-2" type="button" id="searchBtn">Search</button>
+        </div>
+    </div>
+</div>
+
+<div class="p-2" id="videosTableBody"></div>
+
+<div class="d-flex justify-content-end me-3 mb-2">
+    <ul class="navbar-nav me-3">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="itemsPerPageDropdown" role="button" aria-expanded="false">Rows per page:</a>
+            <div class="dropdown-menu">
+                <button type="button" class="dropdown-item pageSizeBtn" data-value="10">10</button>
+                <button type="button" class="dropdown-item pageSizeBtn" data-value="20">20</button>
+                <button type="button" class="dropdown-item pageSizeBtn" data-value="50">50</button>
+                <button type="button" class="dropdown-item pageSizeBtn" data-value="100">100</button>
+            </div>
+        </li>
+    </ul>
+    <ul class="navbar-nav me-3">
+        <li class="nav-item">
+            <span class="nav-link" id="itemsPerPageDisplay"></span>
+        </li>
+    </ul>
+    <ul class="navbar-nav me-3">
+        <li class="nav-item">
+            <span class="nav-link" id="paginationSummery"></span>
+        </li>
+    </ul>
+
+    <div id="paginationBtnGroup" class="btn-group">
+    </div>
+</div>

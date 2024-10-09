@@ -1,7 +1,100 @@
-﻿@{
+﻿@model ClipShare.ViewModels.Home.Home_vm
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center pt-2">
-    <h2>ClipShare is your go-to platform for sharing and discovering amazing video clips.</h2>
-</div>
+@if (!User.Identity.IsAuthenticated)
+{
+    <div class="text-center pt-2">
+        <h2>ClipShare is your go-to platform for sharing and discovering amazing video clips.</h2>
+    </div>
+}
+else
+{
+    <div class="d-lg-flex">
+        <!-- Sidebar for larger screens -->
+        <nav class="p-2 text-bg-dark rounded d-none d-lg-block" style="width: 250px; min-height: 700px;">
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a asp-action="Index" asp-route-page="Home" class="nav-link text-white @Html.IsActivePage("Home")">
+                        <i class="bi bi-house-door me-2"></i><span class="nav-text">Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-action="Index" asp-route-page="Subscriptions" class="nav-link text-white  @Html.IsActivePage("Subscriptions")">
+                        <i class="bi bi-youtube me-2"></i><span class="nav-text">Subscriptions</span>
+                    </a>
+                </li>
+                <li>
+                    <hr />
+                </li>
+                <li class="nav-item">
+                    <a asp-action="Index" asp-route-page="History" class="nav-link text-white  @Html.IsActivePage("History")">
+                        <i class="bi bi-clock-history me-2"></i><span class="nav-text">History</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-action="Index" asp-route-page="Likes" class="nav-link text-white  @Html.IsActivePage("Likes")">
+                        <i class="bi bi-hand-thumbs-up me-2"></i><span class="nav-text">Likes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-action="Index" asp-route-page="Dislikes" class="nav-link text-white  @Html.IsActivePage("Dislikes")">
+                        <i class="bi bi-hand-thumbs-down me-2"></i><span class="nav-text">Dislikes</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Navbar for smaller screens -->
+        <nav class="d-lg-none mb-2">
+            <div class="p-2 text-bg-dark rounded d-flex justify-content-between" style="width: 100%;">
+                <a asp-action="Index" asp-route-page="Home" class="btn btn-dark  @Html.IsActivePage("Home")">
+                    <i class="bi bi-house-door me-2"></i>
+                </a>
+                <a asp-action="Index" asp-route-page="Subscriptions" class="btn btn-dark  @Html.IsActivePage("Subscriptions")">
+                    <i class="bi bi-youtube me-2"></i>
+                </a>
+                <a asp-action="Index" asp-route-page="History" class="btn btn-dark  @Html.IsActivePage("History")">
+                    <i class="bi bi-clock-history me-2"></i>
+                </a>
+                <a asp-action="Index" asp-route-page="Likes" class="btn btn-dark  @Html.IsActivePage("Likes")">
+                    <i class="bi bi-hand-thumbs-up me-2"></i>
+                </a>
+                <a asp-action="Index" asp-route-page="Dislikes" class="btn btn-dark  @Html.IsActivePage("Dislikes")">
+                    <i class="bi bi-hand-thumbs-down me-2"></i>
+                </a>
+            </div>
+        </nav>
+
+
+        <div class="px-2 rounded" style="background-color: #f8f9fa; width: 100%;">
+            @if (Model.Page == null || Model.Page == "Home")
+            {
+                <partial name="_HomePartial" model="Model" />
+            }
+            else
+            {
+                <p>Others</p>
+            }
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <script src="~/js/home_home.js"></script>
+    <script>
+        $(function () {
+            const activeLink = $('.nav-link.active');
+            const linkName = activeLink.find('.nav-text').text();
+
+            if (linkName == "Home") {
+                getMyVideos();
+            } else {
+                console.log('else');
+            }
+        })
+    </script>
+}

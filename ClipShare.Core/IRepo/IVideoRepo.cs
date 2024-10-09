@@ -11,7 +11,8 @@ namespace ClipShare.Core.IRepo
 {
     public interface IVideoRepo : IBaseRepo<Video>
     {
-        Task<int> GetUserIdByVideoId(int videoId);
-        Task<PaginatedList<VideoGridChannelDto>> GetVideosForChannelGrid(int channelId, BaseParameters parameters);
+        Task<int> GetUserIdByVideoIdAsync(int videoId);
+        Task<PaginatedList<VideoGridChannelDto>> GetVideosForChannelGridAsync(int channelId, BaseParameters parameters);
+        Task<PaginatedList<VideoForHomeGridDto>> GetVideosForHomeGridAsync(HomeParameters parameters);
     }
 }

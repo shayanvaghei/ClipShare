@@ -27,6 +27,12 @@ namespace ClipShare.Controllers
         {
             _photoService = photoService;
         }
+
+        public IActionResult Watch(int id)
+        {
+            return View();
+        }
+
         public async Task<IActionResult> CreateEditVideo(int id)
         {
             if (!await UnitOfWork.ChannelRepo.AnyAsync(x => x.AppUserId == User.GetUserId()))
@@ -43,7 +49,7 @@ namespace ClipShare.Controllers
             {
                 // edit part
 
-                var userId = await UnitOfWork.VideoRepo.GetUserIdByVideoId(id);
+                var userId = await UnitOfWork.VideoRepo.GetUserIdByVideoIdAsync(id);
                 if (!userId.Equals(User.GetUserId()))
                 {
                     TempData["notfication"] = "false;Not Found;Requested video was not found.";
@@ -189,7 +195,7 @@ namespace ClipShare.Controllers
         public async Task<IActionResult> GetVideosForChannelGrid(BaseParameters parameters)
         {
             var userChannelId = await UnitOfWork.ChannelRepo.GetChannelIdByUserId(User.GetUserId());
-            var videosForGrid = await UnitOfWork.VideoRepo.GetVideosForChannelGrid(userChannelId, parameters);
+            var videosForGrid = await UnitOfWork.VideoRepo.GetVideosForChannelGridAsync(userChannelId, parameters);
             var paginatedResults = new PaginatedResult<VideoGridChannelDto>(videosForGrid, videosForGrid.TotalItemsCount,
                 videosForGrid.PageNumber, videosForGrid.PageSize, videosForGrid.TotalPages);
 

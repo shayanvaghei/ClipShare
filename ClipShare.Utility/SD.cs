@@ -22,6 +22,17 @@ namespace ClipShare.Utility
             return retrunActive ? cssClass : string.Empty;
         }
 
+        public static string IsActivePage(this IHtmlHelper html, string page)
+        {
+            var currentPage = html.ViewContext.HttpContext.Request.Query["page"].ToString();
+            var isPageMatch = currentPage == page;
+
+            // default Home page
+            if (string.IsNullOrEmpty(currentPage) && page == "Home") return "active";
+
+            return isPageMatch ? "active" : string.Empty;
+        }
+
         public static int GetRandomNumber(int minValue, int maxValue, int seed)
         {
             Random random = new Random(seed);

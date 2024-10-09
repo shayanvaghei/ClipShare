@@ -22,7 +22,7 @@ namespace ClipShare.DataAccess.Repo
             _context = context;
         }
 
-        public async Task<int> GetUserIdByVideoId(int videoId)
+        public async Task<int> GetUserIdByVideoIdAsync(int videoId)
         {
             return await _context.Video
                 .Where(x => x.Id == videoId)
@@ -30,7 +30,7 @@ namespace ClipShare.DataAccess.Repo
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<PaginatedList<VideoGridChannelDto>> GetVideosForChannelGrid(int channelId, BaseParameters parameters)
+        public async Task<PaginatedList<VideoGridChannelDto>> GetVideosForChannelGridAsync(int channelId, BaseParameters parameters)
         {
             var query = _context.Video
                 .Include(x => x.Category)
@@ -71,6 +71,36 @@ namespace ClipShare.DataAccess.Repo
             };
 
             return await PaginatedList<VideoGridChannelDto>.CreateAsync(query.AsNoTracking(), parameters.PageNumber, parameters.PageSize);
+        }
+
+        public async Task<PaginatedList<VideoForHomeGridDto>> GetVideosForHomeGridAsync(HomeParameters parameters)
+        {
+            var query = _context.Video
+                .Select(x => new VideoForHomeGridDto
+                {
+                    Id = x.Id,
+                    ThumbnailUrl = x.ThumbnailUrl,
+                    Title = x.Title,
+                    Description = x.Description,
+                    CreatedAt = x.CreatedAt,
+                    ChannelName = x.Channel.Name,
+                    ChannelId = x.Channel.Id,
+                    CategoryId = x.Category.Id,
+                    Views = SD.GetRandomNumber(100, 500000, x.Id)
+                })
+                .AsQueryable();
+
+            if (parameters.CategoryId > 0)
+            {
+                query = query.Where(x => x.CategoryId == parameters.CategoryId);
+            }
+
+            if (!string.IsNullOrEmpty(parameters.SearchBy))
+            {
+                query = query.Where(x => x.Title.ToLower().Contains(parameters.SearchBy) || x.Description.ToLower().Contains(parameters.SearchBy));
+            }
+
+            return await PaginatedList<VideoForHomeGridDto>.CreateAsync(query.AsNoTracking(), parameters.PageNumber, parameters.PageSize);
         }
     }
 }
