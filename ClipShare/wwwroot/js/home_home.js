@@ -17,7 +17,6 @@ function getMyVideos() {
         data: parameters,
         success: function (data) {
             const result = data.result;
-            console.log(data);
 
             $('#videosTableBody').empty();
             $('#paginationSummery').empty();

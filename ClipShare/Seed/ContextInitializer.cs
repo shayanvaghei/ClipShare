@@ -138,8 +138,12 @@ namespace ClipShare.Seed
                         Title = title,
                         Description = descrption,
                         CategoryId = categoryId,
-                        ContentType = videoFiles[i].Extension,
-                        Contents = GetContentsAsync(videoFile).GetAwaiter().GetResult(),
+                        VideoFile = new VideoFile
+                        {
+                            ContentType = SD.GetContentType(videoFiles[i].Extension),
+                            Contents = GetContentsAsync(videoFile).GetAwaiter().GetResult(),
+                            Extension = videoFiles[i].Extension
+                        },
                         ThumbnailUrl = photoService.UploadPhotoLocally(imageFile),
                         ChannelId = (i % 2 == 0) ? johnChannel.Id : peterChannel.Id,
                         CreatedAt = SD.GetRandomDate(new DateTime(2015, 1, 1), DateTime.UtcNow, i)

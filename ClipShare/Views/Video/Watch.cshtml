@@ -1,2 +1,150 @@
-﻿
-<p>Watch works</p>
+﻿@model ClipShare.ViewModels.Video.VideoWatch_vm
+
+<style>
+    video {
+        width: 100%;
+        border-radius: 20px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        outline: none;
+    }
+
+        video:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+        }
+
+    .font-btn {
+        font-size: 1.2rem;
+    }
+</style>
+
+
+<a asp-action="Index" asp-controller="Home" class="btn btn-primary btn-lg">Back</a>
+
+<div class="row mt-3">
+    <div class="col-lg-9 mb-2">
+        <video controls>
+            <source src="/Video/GetVideoFile?videoId=@Model.Id" type="" />
+            Your browser does not support the video tag.
+        </video>
+        <div class="d-flex justify-content-between mt-2">
+            <section>
+                <span class="badge bg-warning font-btn" id="increase-views-btn">
+                    <i class="bi bi-eye"></i><span id="view-count" class="ms-2">@Model.ViewersCount.ToString("N0")</span>
+                </span>
+            </section>
+            <section class="d-flex align-content-center">
+                <button class="btn btn@(Model.IsLiked ? "" : "-outline")-dark font-btn me-1" id="likeBtn" onclick="likeDislike('likeBtn', 'like')">
+                    <i class="bi bi-hand-thumbs-up-fill"></i> <span class="ms-2">@SD.FormatView(Model.LikesCount)</span>
+                </button>
+                <button class="btn btn@(Model.IsDisiked ? "" : "-outline")-dark font-btn me-1" id="dislikeBtn" onclick="likeDislike('dislikeBtn', 'dislike')">
+                    <i class="bi bi-hand-thumbs-down-fill"></i> <span class="ms-2">@SD.FormatView(Model.DislikesCount)</span>
+                </button>
+                <form method="post">
+                    <button asp-action="DownloadVideoFile" asp-route-videoId="@Model.Id" type="submit" class="btn btn-outline-primary font-btn">Download</button>
+                </form>
+            </section>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card border-secondary mb-3">
+            <div class="card-header">
+                <p class="text-danger-emphasis h4">@Model.Title</p>
+                <p>
+                    @SD.TimeAgo(Model.CreatedAt)
+                </p>
+                <div class="d-flex align-content-center justify-content-between">
+                    <div>
+                        <a asp-action="Member" asp-controller="Channel" asp-route-id="@Model.ChannelId" class="text-primary text-decoration-none">@Model.ChannelName</a>
+                        <p class="text-muted small mb-0">@SD.FormatView(Model.SubscribersCount) subscribers</p>
+                    </div>
+                    <button id="subscribeBtn" class="btn btn@(Model.IsSubscribed ? "" : "-outline")-dark">
+                        @(Model.IsSubscribed ? "Subscribed" : "Subscribe")
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    @Model.Description
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $('#subscribeBtn').on('click', function () {
+            $.ajax({
+                url: "/Video/SubscribeChannel",
+                type: "PUT",
+                data: { channelId: '@Model.ChannelId' },
+                success: function (data) {
+                    if (data.title == "Unsubscribed") {
+                        $('#subscribeBtn').removeClass('btn-dark');
+                        $('#subscribeBtn').addClass('btn-outline-dark');
+                        $('#subscribeBtn').text('Subscribe');
+                        displayNotification(false, data.title, data.message, 'toastr');
+                    } else if (data.title == "Subscribed") {
+                        $('#subscribeBtn').removeClass('btn-outline-dark');
+                        $('#subscribeBtn').addClass('btn-dark');
+                        $('#subscribeBtn').text('Subscribed');
+                        displayNotification(true, data.title, data.message, 'toastr');
+                    } else {
+                        displayNotification(data.isSuccess, data.title, data.message, 'modal');
+                    }
+                }
+            })
+        });
+
+        function likeDislike(id, action) {
+            let model = {
+                videoId: '@Model.Id',
+                action
+            };
+
+            if ($('#' + id).hasClass('btn-outline-dark')) {
+                model.like = true;
+            } else {
+                model.like = false;
+            }
+
+            $.ajax({
+                url: "/Video/LikeDislikeVideo",
+                type: "PUT",
+                data: model,
+                success: function (data) {
+                    const commands = data.title.split('-');
+                    commands.map(c => {
+                        if (c == 'addLike') {
+                            $('#likeBtn').removeClass('btn-outline-dark');
+                            $('#likeBtn').addClass('btn-dark');
+                            var $span = $('#likeBtn').find('span.ms-2');
+                            var currentNumber = parseInt($span.text());
+                            $span.text(currentNumber + 1);
+                        } else if (c == 'addDislike') {
+                            $('#dislikeBtn').removeClass('btn-outline-dark');
+                            $('#dislikeBtn').addClass('btn-dark');
+                            var $span = $('#dislikeBtn').find('span.ms-2');
+                            var currentNumber = parseInt($span.text());
+                            $span.text(currentNumber + 1);
+                        } else if (c == 'removeLike') {
+                            $('#likeBtn').removeClass('btn-dark');
+                            $('#likeBtn').addClass('btn-outline-dark');
+                            var $span = $('#likeBtn').find('span.ms-2');
+                            var currentNumber = parseInt($span.text());
+                            $span.text(currentNumber - 1);
+                        } else if (c == 'removeDislike') {
+                            $('#dislikeBtn').removeClass('btn-dark');
+                            $('#dislikeBtn').addClass('btn-outline-dark');
+                            var $span = $('#dislikeBtn').find('span.ms-2');
+                            var currentNumber = parseInt($span.text());
+                            $span.text(currentNumber - 1);
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

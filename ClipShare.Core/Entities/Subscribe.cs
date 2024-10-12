@@ -8,6 +8,16 @@ namespace ClipShare.Core.Entities
 {
     public class Subscribe
     {
+        public Subscribe()
+        {
+            
+        }
+        public Subscribe(int appUserId, int channelId)
+        {
+            AppUserId = appUserId;
+            ChannelId = channelId;
+        }
+
         // PK (AppUserId, ChannelId)
         // FK = AppUserId and FK = ChannelId
         public int AppUserId { get; set; }
