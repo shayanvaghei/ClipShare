@@ -17,5 +17,6 @@ namespace ClipShare.ViewModels.Video
         public int DislikesCount { get; set; }
         public int ViewersCount { get; set; }
         public int SubscribersCount { get; set; }
+        public Comment_vm CommentVM { get; set; } = new();
     }
 }

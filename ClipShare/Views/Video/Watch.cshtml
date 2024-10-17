@@ -72,6 +72,8 @@
     </div>
 </div>
 
+<partial name="_CommentPartial" model="@Model.CommentVM" />
+
 
 @section Scripts {
     <script>
@@ -146,5 +148,20 @@
                 }
             });
         }
+
+
+        $('#textComment').on('input', function () {
+            var text = $(this).val().trim();
+            if (text.length > 0) {
+                $('#sectionCommentBtns').fadeIn();
+            } else {
+                $('#sectionCommentBtns').fadeOut();
+            }
+        });
+
+        $('#btnCancel').on('click', function () {
+            $('#textComment').val('');
+            $('#sectionCommentBtns').fadeOut();
+        });
     </script>
 }

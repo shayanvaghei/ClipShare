@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace ClipShare.Core.Entities
 {
-    public class VideoView
+    public class VideoView : BaseEntity
     {
-        // bridge table between AppUser and Video
-        // PK (AppUserId, VideoId)
         // FK = AppUserId and FK = VideoId
-
         public int AppUserId { get; set; }
         public int VideoId { get; set; }
 
@@ -24,7 +21,6 @@ namespace ClipShare.Core.Entities
         public string Country { get; set; }
         public bool Is_Proxy { get; set; }
         public DateTime LastVisit { get; set; } = DateTime.UtcNow;
-
 
 
         // Navigations

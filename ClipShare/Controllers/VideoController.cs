@@ -31,7 +31,7 @@ namespace ClipShare.Controllers
         public async Task<IActionResult> Watch(int id)
         {
             // with having DOT (.) we can have theninclude eg: "Channel.Subscribers"
-            var fetchedVideo = await UnitOfWork.VideoRepo.GetFirstOrDefaultAsync(x => x.Id == id, "Channel.Subscribers,LikeDislikes");
+            var fetchedVideo = await UnitOfWork.VideoRepo.GetFirstOrDefaultAsync(x => x.Id == id, "Channel.Subscribers,LikeDislikes,Comments.AppUser,Viewers");
             if (fetchedVideo != null)
             {
                 var toReturn = new VideoWatch_vm();
@@ -49,11 +49,40 @@ namespace ClipShare.Controllers
                 toReturn.IsDisiked = fetchedVideo.LikeDislikes.Any(x => x.AppUserId == userId && x.Liked == false);
 
                 toReturn.SubscribersCount = fetchedVideo.Channel.Subscribers.Count();
-                toReturn.ViewersCount = SD.GetRandomNumber(1000, 50000, id);
+                toReturn.ViewersCount = fetchedVideo.Viewers.Select(X => X.NumberOfVisit).Sum();
                 toReturn.LikesCount = fetchedVideo.LikeDislikes.Where(x => x.Liked == true).Count();
                 toReturn.DislikesCount = fetchedVideo.LikeDislikes.Where(x => x.Liked == false).Count();
 
+                toReturn.CommentVM.PostComment.VideoId = id;
+                toReturn.CommentVM.AvailableComments = fetchedVideo.Comments.Select(x => new AvailableComment_vm
+                {
+                    FromName = x.AppUser.Name,
+                    FromChannelId = UnitOfWork.ChannelRepo.GetChannelIdByUserId(x.AppUserId).GetAwaiter().GetResult(),
+                    PostedAt = x.PostedAt,
+                    Content = x.Content,
+                });
+
+                var userIpAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                await UnitOfWork.VideoViewRepo.HandleVideoViewAsync(userId, id, userIpAddress);
+                await UnitOfWork.CompleteAsync();
+
                 return View(toReturn);
+            }
+
+            TempData["notification"] = "false;Not Found;Requested video was not found";
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateComment(Comment_vm model)
+        {
+            var video = await UnitOfWork.VideoRepo.GetFirstOrDefaultAsync(x => x.Id == model.PostComment.VideoId, "Comments");
+            if (video != null)
+            {
+                video.Comments.Add(new Comment(User.GetUserId(), model.PostComment.VideoId, model.PostComment.Content.Trim()));
+                await UnitOfWork.CompleteAsync();
+
+                return RedirectToAction("Watch", new { id = model.PostComment.VideoId });
             }
 
             TempData["notification"] = "false;Not Found;Requested video was not found";

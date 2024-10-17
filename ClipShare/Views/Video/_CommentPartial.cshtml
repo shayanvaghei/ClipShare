@@ -1,0 +1,68 @@
+﻿@model ClipShare.ViewModels.Video.Comment_vm
+
+<style>
+    .comment-from {
+        width: 40px;
+        height: 40px;
+    }
+</style>
+
+
+<div class="container my-4">
+    <h2 class="mb-3">@SD.FormatView(Model.AvailableComments.Count()) @(Model.AvailableComments.Count() > 1 ? "Comments" : "Comment")</h2>
+    <div class="row mb-4">
+        <div class="col-3 user-avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center comment-from">
+            @User.GetName().Substring(0, 2).ToUpper()
+        </div>
+        <div class="col-9">
+            <form method="post" asp-action="CreateComment" asp-controller="Video">
+                <input type="text" asp-for="@Model.PostComment.VideoId" hidden />
+                <textarea id="textComment" asp-for="PostComment.Content" class="form-control mb-2" rows="2" placeholder="Add a comment..."></textarea>
+                <div class="d-flex justify-content-end" style="height: 30px;">
+                    <section id="sectionCommentBtns" style="display:none;">
+                        <button id="btnCancel" type="button" class="btn btn-sm btn-light me-2">Cancel</button>
+                        <button id="btnComment" type="submit" class="btn btn-sm btn-primary">Comment</button>
+                    </section>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Comment List -->
+    @for (int i = 0; i < Model.AvailableComments.Count(); i++)
+    {
+        <div class="row mb-4">
+            <div class="col-3 user-avatar bg-@(i % 2 == 0 ? "secondary" : "primary") text-white rounded-circle d-flex align-items-center justify-content-center comment-from">
+                @if (Model.AvailableComments.ElementAt(i).FromChannelId > 0)
+                {
+                    <a asp-controller="Member" asp-action="Channel" asp-route-id="@Model.AvailableComments.ElementAt(i).FromChannelId" class="text-white" style="text-decoration: none;">
+                        @Model.AvailableComments.ElementAt(i).FromName.Substring(0, 2).ToUpper()
+                    </a>
+                }
+                else
+                {
+                    @Model.AvailableComments.ElementAt(i).FromName.Substring(0, 2).ToUpper()
+                }
+            </div>
+            <div class="col-9">
+                <div class="d-flex justify-content-between align-content-center">
+                    @if (Model.AvailableComments.ElementAt(i).FromChannelId > 0)
+                    {
+                        <a asp-controller="Member" asp-action="Channel" asp-route-id="@Model.AvailableComments.ElementAt(i).FromChannelId" class="fw-bold text-dark" style="text-decoration: none;">
+                            @Model.AvailableComments.ElementAt(i).FromName
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="fw-bold">
+                            @Model.AvailableComments.ElementAt(i).FromName
+                        </span>
+                    }
+                    <span class="text-muted small">@SD.TimeAgo(Model.AvailableComments.ElementAt(i).PostedAt)</span>
+                </div>
+                <p>@Model.AvailableComments.ElementAt(i).Content</p>
+            </div>
+        </div>
+
+    }
+</div>

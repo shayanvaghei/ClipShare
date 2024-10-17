@@ -7,9 +7,19 @@ using System.Threading.Tasks;
 
 namespace ClipShare.Core.Entities
 {
-    public class Comment
+    public class Comment : BaseEntity
     {
-        // PK (AppUserId, VideoId)
+        public Comment()
+        {
+            
+        }
+        public Comment(int appUserId, int videoId, string content)
+        {
+            AppUserId = appUserId;
+            VideoId = videoId;
+            Content = content;
+        }
+
         // FK = AppUserId and FK = VideoId
         public int AppUserId { get; set; }
         public int VideoId { get; set; }
