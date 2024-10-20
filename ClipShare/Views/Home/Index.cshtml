@@ -76,7 +76,31 @@ else
             }
             else
             {
-                <p>Others</p>
+                <div class="p-4 border rounded table-wrapper">
+                    <table id="tbData" class="table table-striped table-bordered" style="width:100%">
+                        <thead class="thead-light">
+                            <tr class="table-info">
+                                @if (Model.Page == "Subscriptions")
+                                {
+                                    <th>Channel Name</th>
+                                    <th>Number of Available Videos</th>
+                                }
+                                else if (Model.Page == "History")
+                                {
+                                    <th>Video Title</th>
+                                    <th>Channel Name</th>
+                                    <th>Visited</th>
+                                }
+                                else if (Model.Page == "Likes" || Model.Page == "Dislikes")
+                                {
+                                    <th>Video Title</th>
+                                    <th>Channel Name</th>
+                                    <th>Video Created At</th>
+                                }
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             }
         </div>
     </div>
@@ -86,15 +110,126 @@ else
 @section Scripts {
     <script src="~/js/home_home.js"></script>
     <script>
+        var dataTable;
+
         $(function () {
             const activeLink = $('.nav-link.active');
             const linkName = activeLink.find('.nav-text').text();
 
             if (linkName == "Home") {
                 getMyVideos();
-            } else {
-                console.log('else');
+            } else if (linkName == "Subscriptions") {
+                loadSubscriptions();
+            } else if (linkName == "History") {
+                loadHistory();
+            } else if (linkName == "Likes") {
+                loadLikeDislike(true);
+            } else if (linkName == "Dislikes") {
+                loadLikeDislike(false);
             }
         })
+
+        function loadSubscriptions() {
+            dataTable = $('#tbData').DataTable({
+                "ajax": {
+                    "url": "/Home/GetSubscriptions",
+                    dataSrc: 'result'
+                },
+                "columns": [
+                    {
+                        "data": {
+                            channelName: "channelName"
+                        },
+                        "render": function (data) {
+                            var aTag = `<a href="/Member/Channel/${data.id}" class="text-dark">${data.channelName}</a>`;
+                            return aTag;
+                        }
+                    },
+                    { "data": "videosCount" }
+
+                ]
+            });
+        }
+
+        function loadHistory() {
+            dataTable = $('#tbData').DataTable({
+                "ajax": {
+                    "url": "/Home/GetHistory",
+                    dataSrc: 'result'
+                },
+                "columns": [
+                    {
+                        "data": {
+                            title: "title"
+                        },
+                        "render": function (data) {
+                            var aTag = `<a href="/Video/Watch/${data.id}" class="text-dark">${data.title}</a>`;
+                            return aTag;
+                        }
+                    },
+                    {
+                        "data": {
+                            channelName: "channelName"
+                        },
+                        "render": function (data) {
+                            var aTag = `<a href="/Member/Channel/${data.channelId}" class="text-dark">${data.channelName}</a>`;
+                            return aTag;
+                        }
+                    },
+                    {
+                        "data": {
+                            timeAgo: "timeAgo"
+                        },
+                        "render": function (data) {
+                            var spanTag = `<span class="text-dark"><span class="hidden">${data.lastVisit}</span>${data.lastVisitTimeAgo}</span>`;
+                            return spanTag;
+                        }
+                    },
+
+                ]
+            });
+        }
+
+        function loadLikeDislike(liked) {
+            dataTable = $('#tbData').DataTable({
+                "ajax": {
+                    "url": "/Home/GetLikesDislikesVideos?liked=" + liked,
+                    dataSrc: 'result'
+                },
+                "columns": [
+                    {
+                        "data": {
+                            title: "title"
+                        },
+                        "render": function (data) {
+                            var divTag = '<div class="row">';
+                            divTag += `<div class="col-lg-6 text-center"><a href="/Video/Watch/${data.id}" class="text-dark">${data.title}</a></div>`;
+                            divTag += `<div class="col-lg-6 text-center"><img src="${data.thumbnailUrl}" class="card-img-top rounded preview-image /></div>"`;
+                            divTag += '</div>';
+                            return divTag;
+                        }
+                    },
+                    {
+                        "data": {
+                            channelName: "channelName"
+                        },
+                        "render": function (data) {
+                            var aTag = `<a href="/Member/Channel/${data.channelId}" class="text-dark">${data.channelName}</a>`;
+                            return aTag;
+                        }
+                    },
+                    {
+                        "data": {
+                            createdAtTimeAgo: "createdAtTimeAgo"
+                        },
+                        "render": function (data) {
+                            var spanTag = `<span class="text-dark"><span class="hidden">${data.createdAt}</span>${data.createdAtTimeAgo}</span>`;
+                            return spanTag;
+                        }
+                    },
+
+                ]
+            });
+        }
     </script>
 }

@@ -22,6 +22,8 @@ namespace ClipShare.DataAccess.Data
         public DbSet<Channel> Channel { get; set; }
         public DbSet<Video> Video { get; set; }
         public DbSet<VideoView> VideoView { get; set; }
+        public DbSet<Subscribe> Subscribe { get; set; }
+        public DbSet<LikeDislike> LikeDislike { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -1,4 +1,5 @@
 ﻿using ClipShare.Core.Entities;
+using ClipShare.DataAccess.Data;
 using ClipShare.Utility;
 using ClipShare.ViewModels.Account;
 using Microsoft.AspNetCore.Authentication;
@@ -16,12 +17,15 @@ namespace ClipShare.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly Context _context;
 
         public AccountController(UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager)
+            SignInManager<AppUser> signInManager,
+            Context context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
         }
 
         [HttpGet]
@@ -165,6 +169,13 @@ namespace ClipShare.Controllers
             claimsIdentity.AddClaim(new Claim(ClaimTypes.Email, user.Email));
             claimsIdentity.AddClaim(new Claim(ClaimTypes.GivenName, user.Name));
             claimsIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+
+            var userChannelId = await _context.Channel
+                .Where(x => x.AppUserId == user.Id)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            claimsIdentity.AddClaim(new Claim(ClaimTypes.Sid, userChannelId.ToString()));
 
             var roles = await _userManager.GetRolesAsync(user);
             claimsIdentity.AddClaims(roles.Select(role => new Claim(ClaimTypes.Role, role)));

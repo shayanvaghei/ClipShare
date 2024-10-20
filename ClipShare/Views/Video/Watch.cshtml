@@ -58,9 +58,12 @@
                         <a asp-action="Member" asp-controller="Channel" asp-route-id="@Model.ChannelId" class="text-primary text-decoration-none">@Model.ChannelName</a>
                         <p class="text-muted small mb-0">@SD.FormatView(Model.SubscribersCount) subscribers</p>
                     </div>
-                    <button id="subscribeBtn" class="btn btn@(Model.IsSubscribed ? "" : "-outline")-dark">
-                        @(Model.IsSubscribed ? "Subscribed" : "Subscribe")
-                    </button>
+                    @if (User.GetUserChannelId() != Model.ChannelId)
+                    {
+                        <button id="subscribeBtn" class="btn btn@(Model.IsSubscribed ? "" : "-outline")-dark">
+                            @(Model.IsSubscribed ? "Subscribed" : "Subscribe")
+                        </button>
+                    }
                 </div>
             </div>
             <div class="card-body">

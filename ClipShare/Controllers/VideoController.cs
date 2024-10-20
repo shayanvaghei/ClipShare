@@ -293,6 +293,7 @@ namespace ClipShare.Controllers
             var video = await UnitOfWork.VideoRepo.GetFirstOrDefaultAsync(x => x.Id == id && x.Channel.AppUserId == User.GetUserId());
             if (video != null)
             {
+                _photoService.DeletePhotoLocally(video.ThumbnailUrl);
                 UnitOfWork.VideoRepo.Remove(video);
                 await UnitOfWork.CompleteAsync();
 

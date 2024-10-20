@@ -1,2 +1,88 @@
-﻿
-<p>Channel member works</p>
+﻿@model ClipShare.ViewModels.Member.MemberChannel_vm
+
+<div class="card border-primary mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="text-warning">@Model.Name</h3>
+                <span>Created on @Model.CreatedAt.ToShortDateString()</span>
+            </div>
+            <div class="col text-end">
+                <section>
+                    @Model.NumberOfSubscribers.ToString("N0") @(Model.NumberOfSubscribers > 1 ? "Subscribers" : "Subscriber"),
+                    @Model.NumberOfAvailableVideos.ToString("N0") @(Model.NumberOfAvailableVideos > 1 ? "Videos" : "Video")
+                </section>
+                @if (User.GetUserChannelId() != Model.ChannelId)
+                {
+                    <form method="post">
+                        <button asp-action="SubscribeChannel" asp-route-channelId="@Model.ChannelId" type="submit" class="btn btn@(Model.UserIsSubscribed == true ? "" : "-outline")-dark">
+                            @(Model.UserIsSubscribed ? "Subscribed" : "Subscribe")
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">
+            @Model.About
+        </h5>
+        <hr />
+        <label>Available Videos</label>
+
+        <div class="p-4 border rounded table-wrapper">
+            <table id="tbData" class="table-striped table-bordered" style="width: 100%">
+                <thead class="thead-light">
+                    <tr class="table-info">
+                        <th>Title</th>
+                        <th>Created at</th>
+                        <th>Views</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var dataTable;
+
+        $(function () {
+            loadAvailableVideos();
+        });
+
+        function loadAvailableVideos() {
+            dataTable = $('#tbData').DataTable({
+                "ajax": {
+                    "url": "/Member/GetMemberChannelVideos?channelId=" + @Model.ChannelId,
+                    dataSrc: 'result'
+                },
+                "columns": [
+                    {
+                        "data": {
+                            title: "title"
+                        },
+                        "render": function (data) {
+                            var divTag = '<div class="row">';
+                            divTag += `<div class="col-lg-6 text-center"><a href="/Video/Watch/${data.id}" class="text-dark">${data.title}</a></div>`;
+                            divTag += `<div class="col-lg-6 text-center"><img src="${data.thumbnailUrl}" class="card-img-top rounded preview-image" /></div>`;
+                            divTag += '</div>';
+                            return divTag;
+                        }
+                    },
+                    {
+                        "data": {
+                            channelName: "createdAtTimeAgo"
+                        },
+                        "render": function (data) {
+                            var spanTag = `<span class="text-dark"><span class="hidden">${data.createdAt}</span> ${data.createdAtTimeAgo}</span>`;
+                            return spanTag;
+                        }
+                    },
+                    { "data": "numberOfViews" },
+                ]
+            });
+        }
+    </script>
+}

@@ -45,5 +45,18 @@ namespace ClipShare.Services
 
             return @"\images\thumbnails\" + fileName + extension;
         }
+
+        public void DeletePhotoLocally(string photoUrl)
+        {
+            string webRootPath = _hostEnvironment.WebRootPath;
+            string uploadsDriectory = Path.Combine(webRootPath, @"images\thumbnails");
+
+            // Delete the image
+            var oldImagePath = Path.Combine(webRootPath, photoUrl.TrimStart('\\'));
+            if (File.Exists(oldImagePath))
+            {
+                File.Delete(oldImagePath);
+            }
+        }
     }
 }
