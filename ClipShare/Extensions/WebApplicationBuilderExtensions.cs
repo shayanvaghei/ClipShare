@@ -26,6 +26,7 @@ namespace ClipShare.Extensions
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IPhotoService, PhotoService>();
             builder.Services.AddSession();
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             return builder;
         }

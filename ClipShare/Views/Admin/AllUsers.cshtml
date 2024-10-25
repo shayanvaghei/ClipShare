@@ -1,0 +1,92 @@
+﻿@model IEnumerable<ClipShare.ViewModels.Admin.UserDisplayGrid_vm>
+
+<a class="btn btn-primary" asp-action="AddEditUser">Create User</a>
+<div class="card border-primary my-3">
+    <div class="card-header">All Users</div>
+    <div class="card-body">
+        <div class="table-wrapper">
+            <table class="table table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Created At</th>
+                        <th>Channel Name</th>
+                        <th>Assigned Roles</th>
+                        <th>Is Locked</th>
+                        <th class="text-center">
+                            Lock / Unlock
+                        </th>
+                        <th class="text-center">
+                            Edit / Delete
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.Name</td>
+                            <td>@user.Email</td>
+                            <td>@user.CreatedAt.ToLongDateString()</td>
+                            <td>
+                                <a asp-controller="Member" asp-action="Channel" asp-route-id="@user.ChannelId">@user.ChannelName</a>
+                            </td>
+                            <td>
+                                @for (int i = 0; i < user.AssignedRoles.Count(); i++)
+                                {
+                                    <span>
+                                        @user.AssignedRoles.ElementAt(i) @(i + 1 < user.AssignedRoles.Count() ? "," : "")
+                                    </span>
+                                }
+                            </td>
+                            <td>@user.IsLocked</td>
+                            <td class="text-center">
+                                <form method="post">
+                                    @if (!user.IsLocked)
+                                    {
+                                        <button asp-action="LockUser" asp-route-id="@user.Id" class="btn btn-warning btn-sm me-2">
+                                            Lock
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button asp-action="UnlockUser" asp-route-id="@user.Id" class="btn btn-info btn-sm me-2">
+                                            Unlock
+                                        </button>
+                                    }
+                                </form>
+                            </td>
+                            <td class="text-center">
+                                <a class="btn btn-primary btn-sm me-2" asp-action="AddEditUser" asp-route-id="@user.Id">
+                                    Edit
+                                </a>
+                                <a class="btn btn-danger btn-sm me-2" onclick="deleteUser('@user.Id', '@user.Name')">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function deleteUser(id, name) {
+            const result = await confirmation('Warning: You are about to permanently delete user "' + name + '". Once deleted, this action cannot be restored. Are you sure you want to delete?');
+            if (result) {
+                $.ajax({
+                    url: "/Admin/DeleteUser/" + id,
+                    type: "DELETE",
+                    success: function (data) {
+                        displayNotification(data.isSuccess, data.title, data.message, 'modal');
+                        location.reload();
+                    }
+                });
+            }
+        }
+    </script>
+}

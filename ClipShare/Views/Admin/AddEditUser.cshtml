@@ -1,0 +1,82 @@
+﻿@model ClipShare.ViewModels.Admin.UserAddEdit_vm
+
+<div class="d-flex justify-content-center">
+    <div class="col-lg-5">
+        <main class="form-signin">
+            <form method="post" asp-action="AddEditUser">
+                <input type="text" asp-for="Id" hidden />
+
+                <div class=" text-center my-4">
+                    <h1 class="h3 font-weight-normal">
+                        @(Model.Id > 0 ? "Edit" : "Add") User
+                    </h1>
+                </div>
+
+                <div class="form-floating mt-5 mb-3">
+                    <input asp-for="Name" placeholder="Name (Username)" class="form-control" />
+                    <label asp-for="Name"></label>
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Email" placeholder="Email" class="form-control" />
+                    <label asp-for="Email"></label>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Password" type="password" placeholder="Password" class="form-control" />
+                    <label asp-for="Password">
+                        Password @(Model.Id > 0 ? "(Leave the password blank to keep it unchanged)" : "")
+                    </label>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <div class="col-2">
+                        <label asp-for="UserRoles"></label>
+                    </div>
+                    <div class="col-10">
+                        <div class="btn-group">
+                            @foreach (var role in Model.ApplicationRoles)
+                            {
+                                var isChecked = Model.UserRoles.Contains(role); // Check if the role is assigned to the user
+
+                                <input type="checkbox" name="UserRoles" value="@role" id="@role" class="btn-check" @(isChecked ? "checked" : "") />
+                                <label class="btn btn-outline-primary" for="@role">@role</label>
+                            }
+                        </div>
+                        <div>
+                            <span asp-validation-for="UserRoles" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-floating">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                </div>
+
+                <div class="row my-4">
+                    <div class="col-6">
+                        <div class="d-grid">
+                            <button class="btn btn-block btn-info" type="submit">
+                                @(Model.Id > 0 ? "Edit" : "Add") User
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-grid">
+                            <a asp-action="AllUsers" class="btn btn-block btn-danger" type="button">
+                                Back to list
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

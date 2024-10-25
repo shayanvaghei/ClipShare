@@ -48,3 +48,8 @@ body {
 .hidden {
     display: none;
 }
+
+.table-wrapper {
+    width:100%;
+    overflow: auto;
+}
