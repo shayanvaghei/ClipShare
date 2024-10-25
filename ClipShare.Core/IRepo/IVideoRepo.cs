@@ -14,5 +14,6 @@ namespace ClipShare.Core.IRepo
         Task<int> GetUserIdByVideoIdAsync(int videoId);
         Task<PaginatedList<VideoGridChannelDto>> GetVideosForChannelGridAsync(int channelId, BaseParameters parameters);
         Task<PaginatedList<VideoForHomeGridDto>> GetVideosForHomeGridAsync(HomeParameters parameters);
+        Task RemoveVideoAsync(int videoId);
     }
 }

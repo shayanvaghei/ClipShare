@@ -82,8 +82,11 @@
                     url: "/Admin/DeleteUser/" + id,
                     type: "DELETE",
                     success: function (data) {
-                        displayNotification(data.isSuccess, data.title, data.message, 'modal');
-                        location.reload();
+                        if (data.isSuccess) {
+                            location.reload();
+                        } else {
+                            displayNotification(data.isSuccess, data.title, data.message, 'modal');
+                        }
                     }
                 });
             }

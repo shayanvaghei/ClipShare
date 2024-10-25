@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ClipShare.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = $"{SD.UserRole}")]
     public class MemberController : CoreController
     {
 

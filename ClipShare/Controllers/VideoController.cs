@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.IO;
@@ -21,13 +22,6 @@ namespace ClipShare.Controllers
     [Authorize(Roles = $"{SD.UserRole}")]
     public class VideoController : CoreController
     {
-        private readonly IPhotoService _photoService;
-
-        public VideoController(IPhotoService photoService)
-        {
-            _photoService = photoService;
-        }
-
         public async Task<IActionResult> Watch(int id)
         {
             // with having DOT (.) we can have theninclude eg: "Channel.Subscribers"
@@ -233,7 +227,7 @@ namespace ClipShare.Controllers
                             },
                             CategoryId = model.CategoryId,
                             ChannelId = UnitOfWork.ChannelRepo.GetChannelIdByUserId(User.GetUserId()).GetAwaiter().GetResult(),
-                            ThumbnailUrl = _photoService.UploadPhotoLocally(model.ImageUpload)
+                            ThumbnailUrl = PhotoService.UploadPhotoLocally(model.ImageUpload)
                         };
 
                         UnitOfWork.VideoRepo.Add(videoToAdd);
@@ -257,7 +251,7 @@ namespace ClipShare.Controllers
 
                         if (model.ImageUpload != null)
                         {
-                            fetchedVideo.ThumbnailUrl = _photoService.UploadPhotoLocally(model.ImageUpload, fetchedVideo.ThumbnailUrl);
+                            fetchedVideo.ThumbnailUrl = PhotoService.UploadPhotoLocally(model.ImageUpload, fetchedVideo.ThumbnailUrl);
                         }
 
                         title = "Edited";
@@ -290,11 +284,19 @@ namespace ClipShare.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteVideo(int id)
         {
-            var video = await UnitOfWork.VideoRepo.GetFirstOrDefaultAsync(x => x.Id == id && x.Channel.AppUserId == User.GetUserId());
+            var video = await Context.Video
+                .Where(x => x.Id == id && x.Channel.AppUserId == User.GetUserId())
+                .Select(x => new
+                {
+                    x.Id,
+                    x.ThumbnailUrl,
+                    x.Title
+                }).FirstOrDefaultAsync();
+
             if (video != null)
             {
-                _photoService.DeletePhotoLocally(video.ThumbnailUrl);
-                UnitOfWork.VideoRepo.Remove(video);
+                PhotoService.DeletePhotoLocally(video.ThumbnailUrl);
+                await UnitOfWork.VideoRepo.RemoveVideoAsync(video.Id);
                 await UnitOfWork.CompleteAsync();
 
                 return Json(new ApiResponse(200, "Deleted", "Your video of " + video.Title + " has been deleted"));

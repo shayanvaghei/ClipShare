@@ -102,5 +102,30 @@ namespace ClipShare.DataAccess.Repo
 
             return await PaginatedList<VideoForHomeGridDto>.CreateAsync(query.AsNoTracking(), parameters.PageNumber, parameters.PageSize);
         }
+
+        public async Task RemoveVideoAsync(int videoId)
+        {
+            var video = await GetFirstOrDefaultAsync(x => x.Id == videoId, "Comments,LikeDislikes,Viewers");
+
+            if (video != null)
+            {
+                if (video.Viewers != null)
+                {
+                    _context.VideoView.RemoveRange(video.Viewers);
+                }
+
+                if (video.Comments != null)
+                {
+                    _context.Comment.RemoveRange(video.Comments);
+                }
+
+                if (video.LikeDislikes != null)
+                {
+                    _context.RemoveRange(video.LikeDislikes);
+                }
+
+                Remove(video);
+            }
+        }
     }
 }

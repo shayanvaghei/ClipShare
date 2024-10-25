@@ -37,6 +37,18 @@
                                 </ul>
                             </li>
                         }
+
+                        @if (User.IsInRole(SD.ModeratorRole))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="moderatorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Moderator
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="moderatorDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Moderator" asp-action="AllVideos">All Videos</a></li>
+                                </ul>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                    

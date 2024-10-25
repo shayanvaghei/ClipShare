@@ -2,6 +2,7 @@
 using ClipShare.DataAccess.Data;
 using ClipShare.Services.IServices;
 using ClipShare.Utility;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,8 @@ namespace ClipShare.Seed
         public static async Task InitializeAsync(Context context,
             UserManager<AppUser> userManager,
             RoleManager<AppRole> roleManager,
-            IPhotoService photoService)
+            IPhotoService photoService,
+            IWebHostEnvironment webHostEnvironment)
         {
             if (context.Database.GetPendingMigrations().Count() > 0)
             {
@@ -113,6 +115,12 @@ namespace ClipShare.Seed
 
                 await context.SaveChangesAsync();
 
+                var folderPath = Path.Combine(webHostEnvironment.WebRootPath, "images");
+                // Check if the folder exists
+                if (Directory.Exists(folderPath))
+                {
+                    Directory.Delete(folderPath, true);
+                }
 
                 // adding videos and images into our Video table
                 var imageDirectory = new DirectoryInfo("Seed/Files/Thumbnails");
@@ -150,10 +158,8 @@ namespace ClipShare.Seed
                     };
 
                     context.Video.Add(videoToAdd);
+                    await context.SaveChangesAsync();
                 }
-
-
-                await context.SaveChangesAsync();
             }
         }
 

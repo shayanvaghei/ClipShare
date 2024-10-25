@@ -317,6 +317,25 @@ namespace ClipShare.Controllers
             var category = await UnitOfWork.CategoryRepo.GetByIdAsync(id);
             if (category != null)
             {
+                var categoryVideoIdsAndThumbnailUrls = await Context.Video
+                    .Where(x => x.CategoryId == id)
+                    .Select(x => new
+                    {
+                        x.Id,
+                        x.ThumbnailUrl
+                    })
+                    .ToListAsync();
+
+                if (categoryVideoIdsAndThumbnailUrls.Any())
+                {
+                    foreach (var video in categoryVideoIdsAndThumbnailUrls)
+                    {
+                        PhotoService.DeletePhotoLocally(video.ThumbnailUrl);
+                        await UnitOfWork.VideoRepo.RemoveVideoAsync(video.Id);
+                        await UnitOfWork.CompleteAsync();
+                    }
+                }
+
                 UnitOfWork.CategoryRepo.Remove(category);
                 await UnitOfWork.CompleteAsync();
 
@@ -330,6 +349,7 @@ namespace ClipShare.Controllers
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _userManager.Users
+                .Include(x => x.Channel)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
 
@@ -340,10 +360,32 @@ namespace ClipShare.Controllers
                     return Json(new ApiResponse(400, message: "Super admin cannot be deleted"));
                 }
 
+                if (user.Channel != null)
+                {
+                    var userChannelWithVideos = await Context.Channel
+                        .Where(x => x.AppUserId == id)
+                        .Select(x => new
+                        {
+                            Videos = x.Videos.Select(x => new
+                            {
+                                x.Id,
+                                x.ThumbnailUrl
+                            })
+                        }).FirstOrDefaultAsync();
+
+                    foreach (var video in userChannelWithVideos.Videos)
+                    {
+                        PhotoService.DeletePhotoLocally(video.ThumbnailUrl);
+                        await UnitOfWork.VideoRepo.RemoveVideoAsync(video.Id);
+                        await UnitOfWork.CompleteAsync();
+                    }
+                }
+
                 var result = await _userManager.DeleteAsync(user);
                 if (result.Succeeded)
                 {
-                    return Json(new ApiResponse(200, "Deleted", "User of " + user.Name + " has been permanetly deleted"));
+                    TempData["notification"] = $"true;Deleted;User of {user.Name} has been permanently removed";
+                    return Json(new ApiResponse(200));
                 }
                 else
                 {
