@@ -24,40 +24,16 @@ namespace ClipShare.Controllers
     {
         public async Task<IActionResult> Watch(int id)
         {
-            // with having DOT (.) we can have theninclude eg: "Channel.Subscribers"
-            var fetchedVideo = await UnitOfWork.VideoRepo.GetFirstOrDefaultAsync(x => x.Id == id, "Channel.Subscribers,LikeDislikes,Comments.AppUser,Viewers");
-            if (fetchedVideo != null)
+            // inefficient way of fetching the videos with lots of include properties with uneccessary columns
+            // var toReturn = await GetVideoWatch_vmWithIncludeProperties(id);
+
+            // efficient way of fetching the video from the database and only takes the column that we are interested in the query
+            var toReturn = await GetVideoWatch_vmWithProjections(id);
+
+            if (toReturn != null)
             {
-                var toReturn = new VideoWatch_vm();
-                int userId = User.GetUserId();
-
-                toReturn.Id = fetchedVideo.Id;
-                toReturn.Title = fetchedVideo.Title;
-                toReturn.Description = fetchedVideo.Description;
-                toReturn.CreatedAt = fetchedVideo.CreatedAt;
-                toReturn.ChannelId = fetchedVideo.ChannelId;
-                toReturn.ChannelName = fetchedVideo.Channel.Name;
-
-                toReturn.IsSubscribed = fetchedVideo.Channel.Subscribers.Any(x => x.AppUserId == userId);
-                toReturn.IsLiked = fetchedVideo.LikeDislikes.Any(x => x.AppUserId == userId && x.Liked == true);
-                toReturn.IsDisiked = fetchedVideo.LikeDislikes.Any(x => x.AppUserId == userId && x.Liked == false);
-
-                toReturn.SubscribersCount = fetchedVideo.Channel.Subscribers.Count();
-                toReturn.ViewersCount = fetchedVideo.Viewers.Select(X => X.NumberOfVisit).Sum();
-                toReturn.LikesCount = fetchedVideo.LikeDislikes.Where(x => x.Liked == true).Count();
-                toReturn.DislikesCount = fetchedVideo.LikeDislikes.Where(x => x.Liked == false).Count();
-
-                toReturn.CommentVM.PostComment.VideoId = id;
-                toReturn.CommentVM.AvailableComments = fetchedVideo.Comments.Select(x => new AvailableComment_vm
-                {
-                    FromName = x.AppUser.Name,
-                    FromChannelId = UnitOfWork.ChannelRepo.GetChannelIdByUserId(x.AppUserId).GetAwaiter().GetResult(),
-                    PostedAt = x.PostedAt,
-                    Content = x.Content,
-                });
-
                 var userIpAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-                await UnitOfWork.VideoViewRepo.HandleVideoViewAsync(userId, id, userIpAddress);
+                await UnitOfWork.VideoViewRepo.HandleVideoViewAsync(User.GetUserId(), id, userIpAddress);
                 await UnitOfWork.CompleteAsync();
 
                 return View(toReturn);
@@ -463,6 +439,86 @@ namespace ClipShare.Controllers
             await file.CopyToAsync(memoryStream);
             contents = memoryStream.ToArray();
             return contents;
+        }
+
+        private async Task<VideoWatch_vm> GetVideoWatch_vmWithIncludeProperties(int id)
+        {
+            // with having DOT (.) we can have theninclude eg: "Channel.Subscribers"
+            var fetchedVideo = await UnitOfWork.VideoRepo.GetFirstOrDefaultAsync(x => x.Id == id, "Channel.Subscribers,LikeDislikes,Comments.AppUser,Viewers");
+            if (fetchedVideo != null)
+            {
+                var toReturn = new VideoWatch_vm();
+                int userId = User.GetUserId();
+
+                toReturn.Id = fetchedVideo.Id;
+                toReturn.Title = fetchedVideo.Title;
+                toReturn.Description = fetchedVideo.Description;
+                toReturn.CreatedAt = fetchedVideo.CreatedAt;
+                toReturn.ChannelId = fetchedVideo.ChannelId;
+                toReturn.ChannelName = fetchedVideo.Channel.Name;
+
+                toReturn.IsSubscribed = fetchedVideo.Channel.Subscribers.Any(x => x.AppUserId == userId);
+                toReturn.IsLiked = fetchedVideo.LikeDislikes.Any(x => x.AppUserId == userId && x.Liked == true);
+                toReturn.IsDisiked = fetchedVideo.LikeDislikes.Any(x => x.AppUserId == userId && x.Liked == false);
+
+                toReturn.SubscribersCount = fetchedVideo.Channel.Subscribers.Count();
+                toReturn.ViewersCount = fetchedVideo.Viewers.Select(X => X.NumberOfVisit).Sum();
+                toReturn.LikesCount = fetchedVideo.LikeDislikes.Where(x => x.Liked == true).Count();
+                toReturn.DislikesCount = fetchedVideo.LikeDislikes.Where(x => x.Liked == false).Count();
+
+                toReturn.CommentVM.PostComment.VideoId = id;
+                toReturn.CommentVM.AvailableComments = fetchedVideo.Comments.Select(x => new AvailableComment_vm
+                {
+                    FromName = x.AppUser.Name,
+                    FromChannelId = UnitOfWork.ChannelRepo.GetChannelIdByUserId(x.AppUserId).GetAwaiter().GetResult(),
+                    PostedAt = x.PostedAt,
+                    Content = x.Content,
+                });
+
+                return toReturn;
+            }
+
+            return null;
+        }
+
+        private async Task<VideoWatch_vm> GetVideoWatch_vmWithProjections(int id)
+        {
+            int userId = User.GetUserId();
+            var toReturn = await Context.Video
+                .Where(x => x.Id == id)
+                .Select(x => new VideoWatch_vm
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Description = x.Description,
+                    CreatedAt = x.CreatedAt,
+                    ChannelId = x.ChannelId,
+                    ChannelName = x.Channel.Name,
+                    IsSubscribed = x.Channel.Subscribers.Any(s => s.AppUserId == userId),
+                    IsLiked = x.LikeDislikes.Any(l => l.AppUserId == userId && l.Liked == true),
+                    IsDisiked = x.LikeDislikes.Any(l => l.AppUserId == userId && l.Liked == false),
+                    SubscribersCount = x.Channel.Subscribers.Count(),
+                    ViewersCount = x.Viewers.Select(v => v.NumberOfVisit).Sum(),
+                    LikesCount = x.LikeDislikes.Where(l => l.Liked == true).Count(),
+                    DislikesCount = x.LikeDislikes.Where(l => l.Liked == false).Count(),
+                    CommentVM = new Comment_vm
+                    {
+                        PostComment = new CommentPost_vm
+                        {
+                            VideoId = x.Id
+                        },
+                        AvailableComments = x.Comments.Select(c => new AvailableComment_vm
+                        {
+                            FromName = c.AppUser.Name,
+                            FromChannelId = UnitOfWork.ChannelRepo.GetChannelIdByUserId(c.AppUserId).GetAwaiter().GetResult(),
+                            PostedAt = c.PostedAt,
+                            Content = c.Content,
+                        })
+                    }
+                })
+                .FirstOrDefaultAsync();
+
+            return toReturn;
         }
         #endregion
     }

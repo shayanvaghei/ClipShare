@@ -37,12 +37,13 @@ namespace ClipShare.Controllers
                 }
             }
 
-            var channel = await UnitOfWork.ChannelRepo.GetFirstOrDefaultAsync(x => x.AppUserId == User.GetUserId());
+            var channel = await UnitOfWork.ChannelRepo.GetFirstOrDefaultAsync(x => x.AppUserId == User.GetUserId(), includeProperties: "Subscribers");
 
             if (channel != null)
             {
                 model.Name = channel.Name;
                 model.About = channel.About;
+                model.SubscribersCount = channel.Subscribers.Count();
             }
 
             return View(model);

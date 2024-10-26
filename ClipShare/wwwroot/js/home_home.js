@@ -118,7 +118,7 @@ function getMyVideos() {
                 divTag += `<a href="/Video/Watch/${v.id}" class="text-danger-emphasis" style="text-decoration: none;">${v.title}</a>`;
                 divTag += '<div><span style="font-size: small">';
                 divTag += `<a href="/Member/Channel/${v.channelId}" style="text-decoration: none;" class="text-primary">${v.channelName}</a> <br />`;
-                divTag += `${formatView(v.views)} Views - ${timeAgo(v.createdAt)}</span></div>`;
+                divTag += `${formatView(v.views)} - ${timeAgo(v.createdAt)}</span></div>`;
                 divTag += '</div></div>';
 
                 if ((index + 1) % 4 == 0) {

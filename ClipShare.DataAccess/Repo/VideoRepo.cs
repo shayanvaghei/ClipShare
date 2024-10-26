@@ -42,10 +42,10 @@ namespace ClipShare.DataAccess.Repo
                     Title = x.Title,
                     CreatedAt = x.CreatedAt,
                     CategoryName = x.Category.Name,
-                    Views = SD.GetRandomNumber(1000, 500000, x.Id),
-                    Comments = SD.GetRandomNumber(1, 100, x.Id),
-                    Likes = SD.GetRandomNumber(10, 100, x.Id),
-                    Dislikes = SD.GetRandomNumber(5, 100, x.Id),
+                    Views = x.Viewers.Count(),
+                    Comments = x.Comments.Count(),
+                    Likes = x.LikeDislikes.Where(l => l.Liked == true).Count(),
+                    Dislikes = x.LikeDislikes.Where(l => l.Liked == false).Count(),
                 })
                 .AsQueryable();
 
@@ -57,14 +57,14 @@ namespace ClipShare.DataAccess.Repo
                 "title-d" => query.OrderByDescending(x => x.Title),
                 "date-a" => query.OrderBy(u => u.CreatedAt),
                 "date-d" => query.OrderByDescending(u => u.CreatedAt),
-                //"views-a" => query.OrderBy(u => u.Views.ToString()),
-                //"views-d" => query.OrderByDescending(u => u.Views.ToString()),
-                //"comments-a" => query.OrderBy(u => u.Comments),
-                //"comments-d" => query.OrderByDescending(u => u.Comments),
-                //"likes-a" => query.OrderBy(u => u.Likes),
-                //"likes-d" => query.OrderByDescending(u => u.Likes),
-                //"dislikes-a" => query.OrderBy(u => u.Dislikes),
-                //"dislikes-d" => query.OrderByDescending(u => u.Dislikes),
+                "views-a" => query.OrderBy(u => u.Views),
+                "views-d" => query.OrderByDescending(u => u.Views),
+                "comments-a" => query.OrderBy(u => u.Comments),
+                "comments-d" => query.OrderByDescending(u => u.Comments),
+                "likes-a" => query.OrderBy(u => u.Likes),
+                "likes-d" => query.OrderByDescending(u => u.Likes),
+                "dislikes-a" => query.OrderBy(u => u.Dislikes),
+                "dislikes-d" => query.OrderByDescending(u => u.Dislikes),
                 "category-a" => query.OrderBy(u => u.CategoryName),
                 "category-d" => query.OrderByDescending(u => u.CategoryName),
                 _ => query.OrderByDescending(u => u.CreatedAt)
@@ -86,7 +86,7 @@ namespace ClipShare.DataAccess.Repo
                     ChannelName = x.Channel.Name,
                     ChannelId = x.Channel.Id,
                     CategoryId = x.Category.Id,
-                    Views = SD.GetRandomNumber(100, 500000, x.Id)
+                    Views = x.Viewers.Count()
                 })
                 .AsQueryable();
 

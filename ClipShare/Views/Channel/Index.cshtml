@@ -44,7 +44,7 @@ else
         <div class="tab-pane fade" id="myvideos">
             <div class="mt-3 d-flex justify-content-between">
                 <a class="btn btn-primary" asp-controller="Video" asp-action="CreateEditVideo">Create Video</a>
-                <h4 class="text-danger-emphasis">Subscribers: 2,343</h4>
+                <h4 class="text-danger-emphasis">Subscribers: @Model.SubscribersCount.ToString("N0")</h4>
             </div>
             <div class=" card border-primary mt-3 table-responsive-md">
                 <table class="table mt-3">
@@ -343,8 +343,8 @@ else
                 videos.map((v, index) => {
                     trTag += '<tr>';
                     trTag += `<td>${index + 1}</td>`;
-                    trTag += `<td><img src="${v.thumbnailUrl}" class="card-img-top rounded preview-image" /></td>`;
-                    trTag += `<td><p>${v.title}</p></td>`;
+                    trTag += `<td><a href="/Video/Watch/${v.id}"><img src="${v.thumbnailUrl}" class="card-img-top rounded preview-image" /></a></td>`;
+                    trTag += `<td><p><a href="/Video/Watch/${v.id}" class="text-dark">${v.title}</a></p></td>`;
                     trTag += `<td>${new Date(v.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>`;
                     trTag += `<td>${v.views.toLocaleString()}</td>`;
                     trTag += `<td>${v.comments.toLocaleString()}</td>`;

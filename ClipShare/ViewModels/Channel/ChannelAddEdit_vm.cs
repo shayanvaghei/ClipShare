@@ -14,5 +14,6 @@ namespace ClipShare.ViewModels.Channel
         [Display(Name = "About your channel")]
         public string About { get; set; }
         public List<ModelError_vm> Errors { get; set; } = new List<ModelError_vm>();
+        public int SubscribersCount { get; set; }
     }
 }
