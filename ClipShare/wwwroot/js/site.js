@@ -11,9 +11,9 @@ function formatView(views) {
     }
 }
 
-function timeAgo(dateString) {
+function timeAgo(dateString, utcDateTimeNowString) {
     const dateTime = new Date(dateString); // Parse the date string
-    const now = new Date();
+    const now = new Date(utcDateTimeNowString);
     const timeSpan = now - dateTime;
     const totalSeconds = Math.floor(timeSpan / 1000);
     const minutes = Math.floor(totalSeconds / 60);

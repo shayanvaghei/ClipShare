@@ -510,7 +510,7 @@ namespace ClipShare.Controllers
                         AvailableComments = x.Comments.Select(c => new AvailableComment_vm
                         {
                             FromName = c.AppUser.Name,
-                            FromChannelId = UnitOfWork.ChannelRepo.GetChannelIdByUserId(c.AppUserId).GetAwaiter().GetResult(),
+                            FromChannelId = c.AppUser.Channel.Id,
                             PostedAt = c.PostedAt,
                             Content = c.Content,
                         })

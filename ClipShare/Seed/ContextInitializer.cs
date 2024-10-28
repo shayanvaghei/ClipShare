@@ -114,52 +114,6 @@ namespace ClipShare.Seed
                 context.Category.Add(sport);
 
                 await context.SaveChangesAsync();
-
-                var folderPath = Path.Combine(webHostEnvironment.WebRootPath, "images");
-                // Check if the folder exists
-                if (Directory.Exists(folderPath))
-                {
-                    Directory.Delete(folderPath, true);
-                }
-
-                // adding videos and images into our Video table
-                var imageDirectory = new DirectoryInfo("Seed/Files/Thumbnails");
-                var videoDirectory = new DirectoryInfo("Seed/Files/Videos");
-
-                FileInfo[] imageFiles = imageDirectory.GetFiles();
-                FileInfo[] videoFiles = videoDirectory.GetFiles();
-
-                var descrption = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ";
-
-                for (int i = 0; i < 30; i++)
-                {
-                    var allNames = videoFiles[i].Name.Split("-");
-                    var categoryName = allNames[0];
-                    var title = allNames[2].Split(".")[0];
-                    var categoryId = await context.Category.Where(x => x.Name.ToLower() == categoryName).Select(x => x.Id).FirstOrDefaultAsync();
-
-                    IFormFile imageFile = ConvertToFile(imageFiles[i]);
-                    IFormFile videoFile = ConvertToFile(videoFiles[i]);
-
-                    var videoToAdd = new Video
-                    {
-                        Title = title,
-                        Description = descrption,
-                        CategoryId = categoryId,
-                        VideoFile = new VideoFile
-                        {
-                            ContentType = SD.GetContentType(videoFiles[i].Extension),
-                            Contents = GetContentsAsync(videoFile).GetAwaiter().GetResult(),
-                            Extension = videoFiles[i].Extension
-                        },
-                        ThumbnailUrl = photoService.UploadPhotoLocally(imageFile),
-                        ChannelId = (i % 2 == 0) ? johnChannel.Id : peterChannel.Id,
-                        CreatedAt = SD.GetRandomDate(new DateTime(2015, 1, 1), DateTime.UtcNow, i)
-                    };
-
-                    context.Video.Add(videoToAdd);
-                    await context.SaveChangesAsync();
-                }
             }
         }
 

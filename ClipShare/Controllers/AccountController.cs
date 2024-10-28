@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -74,12 +75,12 @@ namespace ClipShare.Controllers
                 if (result.IsLockedOut)
                 {
                     ModelState.AddModelError(string.Empty, $"Your account has been locked. You should wait until {user.LockoutEnd} (UTC time) to be able to login");
-                } 
+                }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid username or password. Please try again.");
                 }
-                
+
                 return View(model);
             }
         }
@@ -148,7 +149,7 @@ namespace ClipShare.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync();
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
 
@@ -171,27 +172,25 @@ namespace ClipShare.Controllers
         }
         private async Task HandleSignInUserAsync(AppUser user)
         {
-            var claimsIdentity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
-            claimsIdentity.AddClaim(new Claim(ClaimTypes.Email, user.Email));
-            claimsIdentity.AddClaim(new Claim(ClaimTypes.GivenName, user.Name));
-            claimsIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
-
             var userChannelId = await _context.Channel
-                .Where(x => x.AppUserId == user.Id)
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
+              .Where(x => x.AppUserId == user.Id)
+              .Select(x => x.Id)
+              .FirstOrDefaultAsync();
 
-            claimsIdentity.AddClaim(new Claim(ClaimTypes.Sid, userChannelId.ToString()));
+            var claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.GivenName, user.Name),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Sid, userChannelId.ToString()),
+            };
 
             var roles = await _userManager.GetRolesAsync(user);
-            claimsIdentity.AddClaims(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-            var principal = new ClaimsPrincipal(claimsIdentity);
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-            // useing this method in order to assign identityClaims into User.Identity and sign the user in using built in dotnet identity
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            await _signInManager.SignInWithClaimsAsync(user, isPersistent: false, claims);
         }
         #endregion
     }

@@ -25,33 +25,38 @@
                         <li class="nav-item">
                             <a class="nav-link text-white @Html.IsActive("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        @if(User.IsInRole(SD.AdminRole))
+
+                        @if (_signInManager.IsSignedIn(User))
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Administration
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Category">Category</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="AllUsers">All Users</a></li>
-                                </ul>
-                            </li>
+                            @if (User.IsInRole(SD.AdminRole))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-white" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Administration
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Category">Category</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="AllUsers">All Users</a></li>
+                                    </ul>
+                                </li>
+                            }
+
+                            @if (User.IsInRole(SD.ModeratorRole))
+                            {
+                                <li class="nav-item dropdown">
+                                            <a class="nav-link dropdown-toggle text-white" href="#" id="moderatorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Moderator
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="moderatorDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Moderator" asp-action="AllVideos">All Videos</a></li>
+                                    </ul>
+                                </li>
+                            }
                         }
 
-                        @if (User.IsInRole(SD.ModeratorRole))
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="moderatorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Moderator
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="moderatorDropdown">
-                                    <li><a class="dropdown-item" asp-controller="Moderator" asp-action="AllVideos">All Videos</a></li>
-                                </ul>
-                            </li>
-                        }
                     </ul>
                     <partial name="_LoginPartial" />
-                   
+
                 </div>
             </div>
         </nav>

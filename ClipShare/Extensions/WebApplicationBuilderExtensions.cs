@@ -33,7 +33,7 @@ namespace ClipShare.Extensions
 
         public static WebApplicationBuilder AddAuthenticationServices(this WebApplicationBuilder builder)
         {
-            builder.Services.AddIdentityCore<AppUser>(options =>
+            builder.Services.AddIdentity<AppUser, AppRole>(options =>
             {
                 options.Password.RequiredLength = 6;
                 options.Password.RequireDigit = true;
@@ -42,10 +42,7 @@ namespace ClipShare.Extensions
                 options.Password.RequireNonAlphanumeric = false;
                 options.SignIn.RequireConfirmedEmail = false;
                 options.Lockout.AllowedForNewUsers = false;
-            }).AddRoles<AppRole>()
-            .AddRoleManager<RoleManager<AppRole>>()
-            .AddSignInManager<SignInManager<AppUser>>()
-            .AddUserManager<UserManager<AppUser>>()
+            })
             .AddEntityFrameworkStores<Context>();
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

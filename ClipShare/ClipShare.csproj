@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Views\Shared\_Confirmation.cshtml" />
-    <Content Remove="Views\Shared\_LoginPartial.cshtml" />
-    <Content Remove="Views\Shared\_Notification.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.7">
@@ -23,30 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClipShare.DataAccess\ClipShare.DataAccess.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Views\Shared\_LoginPartial.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Views\Shared\_Confirmation.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Shared\_LoginPartial.cshtml" />
-    <_ContentIncludedByDefault Remove="Views\Shared\_Notification.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Views\Shared\_Confirmation.cshtml" />
-    <None Include="Views\Shared\_LoginPartial.cshtml" />
-    <None Include="Views\Shared\_Notification.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Views\Shared\_Notification.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Views\Shared\_Confirmation.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

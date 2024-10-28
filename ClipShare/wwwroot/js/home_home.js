@@ -2,6 +2,15 @@
 let pageSize = 10;
 let searchBy = '';
 let categoryId = 0;
+let utcDateTimeNowString;
+
+function getUtcDateTimeNow() {
+    return utcDateTimeNowString;
+}
+
+function setUtcDateTimeNow(date) {
+    utcDateTimeNowString = date;
+}
 
 function getMyVideos() {
     const parameters = {
@@ -118,7 +127,7 @@ function getMyVideos() {
                 divTag += `<a href="/Video/Watch/${v.id}" class="text-danger-emphasis" style="text-decoration: none;">${v.title}</a>`;
                 divTag += '<div><span style="font-size: small">';
                 divTag += `<a href="/Member/Channel/${v.channelId}" style="text-decoration: none;" class="text-primary">${v.channelName}</a> <br />`;
-                divTag += `${formatView(v.views)} - ${timeAgo(v.createdAt)}</span></div>`;
+                divTag += `${formatView(v.views)} - ${timeAgo(v.createdAt, getUtcDateTimeNow())}</span></div>`;
                 divTag += '</div></div>';
 
                 if ((index + 1) % 4 == 0) {
